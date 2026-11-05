@@ -1,0 +1,63 @@
+{
+  "source_repository": "https://github.com/sha1kh-talib/DMA-PROTOCOL",
+  "source_commit": "85868386f1d4c105b8baa666c5a6c273756fa8e5",
+  "joint_project_permission": "User-confirmed; M. Roohan Khan and Talib",
+  "licence_text": "Preserved in docs/UPSTREAM_README.md (MIT, DMA RTL Team, 2026)",
+  "files": [
+    {
+      "source_path": "README.md",
+      "destination_path": "docs/UPSTREAM_README.md",
+      "sha256": "ebd9988156b1959aa4997e4943c3efb494eaae05f193b96abc2c3f058de2ce9b"
+    },
+    {
+      "source_path": "code-files/dma_arbiter.v",
+      "destination_path": "upstream/code-files/dma_arbiter.v",
+      "sha256": "d1b45f49384179f82d71d9f7a61db38500724b63c47deeb52db13d7d31923598"
+    },
+    {
+      "source_path": "code-files/dma_axi4_master.v",
+      "destination_path": "upstream/code-files/dma_axi4_master.v",
+      "sha256": "e4560e91a7722320c5a42d1fc5eb43664853f0e38da94ba960344b0d44919166"
+    },
+    {
+      "source_path": "code-files/dma_axi4lite_slave.v",
+      "destination_path": "upstream/code-files/dma_axi4lite_slave.v",
+      "sha256": "2534217ed409fc554409bc27a8ec9505ab412b56cf04727fb7ba6ee240de32be"
+    },
+    {
+      "source_path": "code-files/dma_channel.v",
+      "destination_path": "upstream/code-files/dma_channel.v",
+      "sha256": "8a813e18f5b0e1911d982c014701583bf9830400a5000a74b61134c78b73da63"
+    },
+    {
+      "source_path": "code-files/dma_descriptor.v",
+      "destination_path": "upstream/code-files/dma_descriptor.v",
+      "sha256": "0e97aeac795190747dd7df38a772d87a627946df3c0ea3fb593a1e8ec986249d"
+    },
+    {
+      "source_path": "code-files/dma_fifo.v",
+      "destination_path": "upstream/code-files/dma_fifo.v",
+      "sha256": "707892fa6ccdb0984778e31253a0fdffce51fcdd0cb2a6994258e816110bd789"
+    },
+    {
+      "source_path": "code-files/dma_interrupt.v",
+      "destination_path": "upstream/code-files/dma_interrupt.v",
+      "sha256": "bfcdfa83371fc0f3226e3c6156a11e8b4e034cf061c0122c8809b8526e488780"
+    },
+    {
+      "source_path": "code-files/dma_regfile.v",
+      "destination_path": "upstream/code-files/dma_regfile.v",
+      "sha256": "7fdea50ff520f7e6856a5e66672f208e7d49d9a356549630847e363ba87fc8a1"
+    },
+    {
+      "source_path": "code-files/dma_tb.v",
+      "destination_path": "upstream/code-files/dma_tb.v",
+      "sha256": "a503716c66680983b4b6b4042a8cb54ab20f5902d1bd1fdde62455e3a6012660"
+    },
+    {
+      "source_path": "code-files/dma_top.v",
+      "destination_path": "upstream/code-files/dma_top.v",
+      "sha256": "f88ea195ac26e215d4c8c00bc9f5191218a7a583b0f9eb7ee70a85b310f33de9"
+    }
+  ]
+}
