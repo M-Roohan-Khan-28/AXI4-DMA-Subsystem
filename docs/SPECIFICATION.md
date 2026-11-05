@@ -60,7 +60,7 @@ assumption. AXI4 itself does not impose that bound.
 
 ## Verification gate
 
-The planned self-checking harness models memory as bytes, snapshots the
+The self-checking harness models memory as bytes, snapshots the
 original source bytes for an independent copy oracle, compares every
 destination byte plus guard regions, and separately counts accepted AXI
 addresses/data/responses. Directed tests cover 0, 1, 8, 9, 128, 129 and
