@@ -31,6 +31,26 @@ simulation reported `Fatal: eight accepted bus mismatch` with 1 simulator
 error; the regression wrapper exited **1**. This confirms the actual
 failure path without changing the committed RTL.
 
-The published clean-clone result will be recorded separately with its tested
-revision. No advanced four-channel or descriptor environment, coverage,
-synthesis, timing, FPGA, or hardware result is claimed.
+The published source was cloned from
+`https://github.com/M-Roohan-Khan-28/AXI4-DMA-Subsystem.git` at
+`670cb280d5ec4b26cf436f10fe5a5be22abb5c90` and run from that
+fresh checkout:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/run_regression.ps1 -OutputDir C:\R_MIGRATION_BACKUP\Roohan_GitHub_Launch_Kit\Roohan_GitHub_Launch_Kit\build\test-runs\dma-published-clone-2026-11-06
+python scripts/check_provenance.py
+```
+
+ModelSim Intel FPGA Starter Edition 2020.1 compiled with 0 errors and
+0 warnings. The simulator and wrapper each exited 0; the bench reported
+**25 cases, 824,446 comparisons, seed `0x28A6BEEF`**. The provenance
+checker exited 0 for all 11 archived files. Raw logs and JSON result are
+under `reports/published-clone-2026-11-06/`.
+
+The portfolio aggregate then ran nine mandatory suites, including this DMA
+suite, from isolated GitHub clones; all nine passed and the aggregate exit
+was **0**. Its DMA entry identifies the same published source revision and
+25 cases. This is a cross-project regression result, not a coverage metric.
+
+No advanced four-channel or descriptor environment, coverage, synthesis,
+timing, FPGA, or hardware result is claimed.

@@ -1,0 +1,42 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish exit tb_dma_portable -do "onerror {quit -code 1}; run -all; quit -code 0" 
+# Start time: 04:32:20 on Nov 06,2026
+# Loading sv_std.std
+# Loading work.tb_dma_portable
+# Loading work.axi4_dma_subsystem
+# onerror {quit -code 1}
+#  Warning: onerror command for use within macro
+#  run -all
+# DMA_CASE_PASS zero length=0 bursts=0
+# DMA_CASE_PASS one length=1 bursts=1
+# DMA_CASE_PASS eight length=8 bursts=1
+# DMA_CASE_PASS nine length=9 bursts=1
+# DMA_CASE_PASS axil_aw_first length=16 bursts=1
+# DMA_CASE_PASS axil_w_first length=16 bursts=1
+# DMA_CASE_PASS burst128 length=128 bursts=1
+# DMA_CASE_PASS burst129 length=129 bursts=2
+# DMA_CASE_PASS source_boundary length=24 bursts=2
+# DMA_CASE_PASS destination_boundary length=24 bursts=2
+# DMA_CASE_PASS max4096_busy length=4096 bursts=32
+# DMA_CASE_PASS bad_source_alignment length=8 bursts=0
+# DMA_CASE_PASS bad_destination_alignment length=8 bursts=0
+# DMA_CASE_PASS overlap length=32 bursts=0
+# DMA_CASE_PASS too_long length=4097 bursts=0
+# DMA_CASE_PASS source_overflow length=16 bursts=0
+# DMA_CASE_PASS destination_overflow length=16 bursts=0
+# DMA_CASE_PASS read_error length=24 bursts=1
+# DMA_CASE_PASS write_error length=24 bursts=1
+# DMA_CASE_PASS reset_during_read
+# DMA_CASE_PASS seeded_0 length=3971 bursts=32
+# DMA_CASE_PASS seeded_1 length=2298 bursts=19
+# DMA_CASE_PASS seeded_2 length=3589 bursts=29
+# DMA_CASE_PASS seeded_3 length=404 bursts=4
+# DMA_CASE_PASS seeded_4 length=2519 bursts=21
+# DMA_REGRESSION_PASS cases=25 checks=824446 seed=0x28A6BEEF
+# ** Note: $finish    : C:/R_MIGRATION_BACKUP/Roohan_GitHub_Launch_Kit/Roohan_GitHub_Launch_Kit/build/published-2026-11-06/AXI4-DMA-Subsystem/tb/tb_dma_portable.sv(419)
+#    Time: 117390 ns  Iteration: 1  Instance: /tb_dma_portable
+# End time: 04:32:20 on Nov 06,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
