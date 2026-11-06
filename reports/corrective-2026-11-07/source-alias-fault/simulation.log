@@ -1,0 +1,20 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish exit tb_dma_portable -do "onerror {quit -code 1}; run -all; quit -code 0" 
+# Start time: 03:13:32 on Nov 07,2026
+# Loading sv_std.std
+# Loading work.tb_dma_portable
+# Loading work.axi4_dma_subsystem
+# onerror {quit -code 1}
+#  Warning: onerror command for use within macro
+#  run -all
+# DMA_CASE_PASS zero length=0 bursts=0
+# DMA_CASE_PASS one length=1 bursts=1
+# ** Fatal: AR oracle mismatch got=00000100/0 expected=00000180/0
+#    Time: 1455 ns  Scope: tb_dma_portable File: C:/R_MIGRATION_BACKUP/Roohan_GitHub_Launch_Kit/Roohan_GitHub_Launch_Kit/build/corrective-faults-2026-11-07/DMA-source-alias/tb/tb_dma_portable.sv Line: 109
+# ** Note: $finish    : C:/R_MIGRATION_BACKUP/Roohan_GitHub_Launch_Kit/Roohan_GitHub_Launch_Kit/build/corrective-faults-2026-11-07/DMA-source-alias/tb/tb_dma_portable.sv(109)
+#    Time: 1455 ns  Iteration: 1  Instance: /tb_dma_portable
+# End time: 03:13:33 on Nov 07,2026, Elapsed time: 0:00:01
+# Errors: 1, Warnings: 0

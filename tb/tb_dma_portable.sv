@@ -38,12 +38,23 @@ module tb_dma_portable;
     logic [7:0] aw_hold_len, ar_hold_len, w_hold_strb;
     logic [63:0] w_hold_data;
     logic w_hold_last;
+    bit oracle_active, oracle_ar_seen, oracle_aw_seen;
+    bit aw_waits_wvalid, w_before_aw_mode, early_w_done;
+    logic [63:0] early_w_data;
+    logic [7:0] early_w_strb;
+    int aw_only_stalls, w_only_stalls;
+    int oracle_src, oracle_dst, oracle_remaining, oracle_chunk;
+    int oracle_r_index, oracle_w_index, oracle_beats;
 
     assign m_axi_awready = aresetn && !write_active && !b_pending &&
-                           !m_axi_bvalid && ((cycle_count % 5) != 0);
+                           !m_axi_bvalid && ((cycle_count % 5) != 0) &&
+                           (!aw_waits_wvalid || m_axi_wvalid) &&
+                           (!w_before_aw_mode || early_w_done);
     assign m_axi_arready = aresetn && !read_active && !m_axi_rvalid &&
                            ((cycle_count % 7) != 0);
-    assign m_axi_wready = aresetn && write_active && ((cycle_count % 4) != 0);
+    assign m_axi_wready = aresetn &&
+                          (write_active || (w_before_aw_mode && !early_w_done && !b_pending)) &&
+                          ((cycle_count % 4) != 0);
 
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
@@ -55,8 +66,13 @@ module tb_dma_portable;
             m_axi_rlast <= 0; m_axi_rid <= 0;
             m_axi_bvalid <= 0; m_axi_bresp <= 0; m_axi_bid <= 0;
             aw_stalled <= 0; ar_stalled <= 0; w_stalled <= 0;
+            early_w_done <= 0;
         end else begin
             cycle_count <= cycle_count + 1;
+            if (m_axi_awvalid && !m_axi_awready && m_axi_wvalid && m_axi_wready)
+                aw_only_stalls++;
+            if (m_axi_wvalid && !m_axi_wready && m_axi_awvalid && m_axi_awready)
+                w_only_stalls++;
             if (aw_stalled &&
                 (!m_axi_awvalid || m_axi_awaddr !== aw_hold_addr ||
                  m_axi_awlen !== aw_hold_len))
@@ -84,6 +100,19 @@ module tb_dma_portable;
             end
 
             if (m_axi_arvalid && m_axi_arready) begin
+                if (oracle_active) begin
+                    if (oracle_ar_seen || oracle_remaining <= 0)
+                        $fatal(1, "Unexpected or duplicate AR");
+                    oracle_chunk = first_chunk(oracle_src, oracle_dst, oracle_remaining);
+                    oracle_beats = (oracle_chunk + 7) / 8;
+                    if (m_axi_araddr !== oracle_src || m_axi_arlen !== oracle_beats-1)
+                        $fatal(1, "AR oracle mismatch got=%h/%0d expected=%h/%0d",
+                               m_axi_araddr, m_axi_arlen, oracle_src, oracle_beats-1);
+                    oracle_ar_seen = 1;
+                    oracle_r_index = 0;
+                    oracle_w_index = 0;
+                    protocol_checks += 2;
+                end
                 if (m_axi_arid !== 0 || m_axi_arsize !== 3 ||
                     m_axi_arburst !== 2'b01 || m_axi_arlen > 15 ||
                     m_axi_araddr[2:0] !== 0 ||
@@ -98,6 +127,18 @@ module tb_dma_portable;
                 protocol_checks++;
             end
             if (m_axi_rvalid && m_axi_rready) begin
+                if (oracle_active) begin
+                    if (!oracle_ar_seen || oracle_r_index >= oracle_beats ||
+                        m_axi_rlast !== (oracle_r_index == oracle_beats-1))
+                        $fatal(1, "R progression mismatch index=%0d", oracle_r_index);
+                    for (int lane=0; lane<8; lane++) begin
+                        if (oracle_r_index*8+lane < oracle_chunk &&
+                            m_axi_rdata[lane*8 +: 8] !== expected[oracle_src+oracle_r_index*8+lane])
+                            $fatal(1, "R source-data mismatch at %h", oracle_src+oracle_r_index*8+lane);
+                        protocol_checks++;
+                    end
+                    oracle_r_index++;
+                end
                 r_count <= r_count + 1;
                 protocol_checks++;
                 m_axi_rvalid <= 0;
@@ -113,20 +154,62 @@ module tb_dma_portable;
             end
 
             if (m_axi_awvalid && m_axi_awready) begin
+                if (oracle_active) begin
+                    if (!oracle_ar_seen || oracle_aw_seen || oracle_r_index != oracle_beats)
+                        $fatal(1, "Unexpected or premature AW");
+                    if (m_axi_awaddr !== oracle_dst || m_axi_awlen !== oracle_beats-1)
+                        $fatal(1, "AW oracle mismatch got=%h/%0d expected=%h/%0d",
+                               m_axi_awaddr, m_axi_awlen, oracle_dst, oracle_beats-1);
+                    oracle_aw_seen = 1;
+                    protocol_checks += 2;
+                end
                 if (m_axi_awid !== 0 || m_axi_awsize !== 3 ||
                     m_axi_awburst !== 2'b01 || m_axi_awlen > 15 ||
                     m_axi_awaddr[2:0] !== 0 ||
                     (int'(m_axi_awaddr[11:0]) + (int'(m_axi_awlen)+1)*8) > 4096 ||
                     (int'(m_axi_awaddr) + (int'(m_axi_awlen)+1)*8) > MEM_SIZE)
                     $fatal(1, "Invalid AW burst addr=%h len=%d", m_axi_awaddr, m_axi_awlen);
-                write_active <= 1;
                 write_addr <= int'(m_axi_awaddr);
                 write_beats <= int'(m_axi_awlen) + 1;
                 write_index <= 0;
+                if (w_before_aw_mode && early_w_done) begin
+                    if (m_axi_awlen != 0) $fatal(1,"W-first model only supports one beat");
+                    for (int lane=0; lane<8; lane++)
+                        if (early_w_strb[lane]) begin
+                            mem[int'(m_axi_awaddr)+lane] <= early_w_data[lane*8 +: 8];
+                            written_bytes++;
+                        end
+                    b_pending <= 1;
+                    b_delay <= 4;
+                end else write_active <= 1;
                 aw_count <= aw_count + 1;
                 protocol_checks++;
             end
             if (m_axi_wvalid && m_axi_wready) begin
+                w_count <= w_count + 1;
+                protocol_checks++;
+                if (oracle_active) begin
+                    if (!oracle_ar_seen || oracle_w_index >= oracle_beats ||
+                        m_axi_wlast !== (oracle_w_index == oracle_beats-1))
+                        $fatal(1, "W progression mismatch index=%0d", oracle_w_index);
+                    for (int lane=0; lane<8; lane++) begin
+                        bit should_write;
+                        should_write = oracle_w_index*8+lane < oracle_chunk;
+                        if (m_axi_wstrb[lane] !== should_write)
+                            $fatal(1, "W strobe mismatch beat=%0d lane=%0d",oracle_w_index,lane);
+                        if (should_write && m_axi_wdata[lane*8 +: 8] !==
+                            expected[oracle_src+oracle_w_index*8+lane])
+                            $fatal(1, "W data mismatch source=%h",oracle_src+oracle_w_index*8+lane);
+                        protocol_checks++;
+                    end
+                    oracle_w_index++;
+                end
+                if (w_before_aw_mode && !write_active) begin
+                    if (!m_axi_wlast) $fatal(1,"Expected one W-first beat");
+                    early_w_data <= m_axi_wdata;
+                    early_w_strb <= m_axi_wstrb;
+                    early_w_done <= 1;
+                end else begin
                 if (m_axi_wlast !== (write_index == write_beats - 1))
                     $fatal(1, "WLAST mismatch beat=%0d total=%0d", write_index, write_beats);
                 for (int lane = 0; lane < 8; lane++)
@@ -134,13 +217,12 @@ module tb_dma_portable;
                         mem[write_addr + write_index*8 + lane] <= m_axi_wdata[lane*8 +: 8];
                         written_bytes++;
                     end
-                w_count <= w_count + 1;
-                protocol_checks++;
                 if (write_index == write_beats - 1) begin
                     write_active <= 0;
                     b_pending <= 1;
                     b_delay <= 4;
                 end else write_index <= write_index + 1;
+                end
             end
             if (b_pending && !m_axi_bvalid) begin
                 if (b_delay != 0) b_delay <= b_delay - 1;
@@ -151,6 +233,16 @@ module tb_dma_portable;
                 end
             end
             if (m_axi_bvalid && m_axi_bready) begin
+                if (oracle_active) begin
+                    if (!oracle_ar_seen || !oracle_aw_seen ||
+                        oracle_r_index != oracle_beats || oracle_w_index != oracle_beats)
+                        $fatal(1, "B before complete oracle burst");
+                    oracle_src += oracle_chunk;
+                    oracle_dst += oracle_chunk;
+                    oracle_remaining -= oracle_chunk;
+                    oracle_ar_seen = 0; oracle_aw_seen = 0;
+                    protocol_checks++;
+                end
                 m_axi_bvalid <= 0;
                 b_pending <= 0;
                 protocol_checks++;
@@ -159,15 +251,20 @@ module tb_dma_portable;
     end
 
     task automatic reset_case;
+        int unsigned init_rng;
+        oracle_active = 0;
         s_axil_awaddr = 0; s_axil_awvalid = 0;
         s_axil_wdata = 0; s_axil_wstrb = 4'hF; s_axil_wvalid = 0;
         s_axil_bready = 0; s_axil_araddr = 0; s_axil_arvalid = 0;
         s_axil_rready = 0;
         inject_read_error = 0; inject_write_error = 0;
+        aw_waits_wvalid = 0; w_before_aw_mode = 0;
         aresetn = 0;
         repeat (3) @(negedge aclk);
+        init_rng = 32'h28A6_BEEF;
         for (int i = 0; i < MEM_SIZE; i++) begin
-            mem[i] = byte'((i*17+13) & 255);
+            init_rng = init_rng * 32'd1664525 + 32'd1013904223;
+            mem[i] = init_rng[31:24];
             expected[i] = mem[i];
         end
         aresetn = 1;
@@ -279,6 +376,7 @@ module tb_dma_portable;
                             input int len, input bit read_error = 0,
                             input bit write_error = 0, input bit busy_probe = 0);
         int ar_before, aw_before, r_before, w_before, bytes_before;
+        int aw_stalls_before, w_stalls_before;
         int bytes_to_copy, burst_expected, beats_expected;
         logic [31:0] status, code;
         bit invalid;
@@ -293,11 +391,18 @@ module tb_dma_portable;
         ar_before = ar_count; aw_before = aw_count;
         r_before = r_count; w_before = w_count;
         bytes_before = written_bytes;
+        aw_stalls_before = aw_only_stalls;
+        w_stalls_before = w_only_stalls;
         if (label == "axil_aw_first") write_reg_split(32'h00, src, 1);
         else if (label == "axil_w_first") write_reg_split(32'h00, src, 0);
         else write_reg(32'h00, src, 0);
         write_reg(32'h04, dst, 0);
         write_reg(32'h08, len, 0);
+        oracle_src = src; oracle_dst = dst; oracle_remaining = len;
+        oracle_ar_seen = 0; oracle_aw_seen = 0;
+        oracle_r_index = 0; oracle_w_index = 0; oracle_active = 1;
+        aw_waits_wvalid = (label == "awready_waits_wvalid");
+        w_before_aw_mode = (label == "w_before_aw");
         read_reg(32'h00, 0, status);
         if (status !== src) $fatal(1, "%s source register readback", label);
         read_reg(32'h04, 0, status);
@@ -342,6 +447,14 @@ module tb_dma_portable;
                    label, ar_count-ar_before, aw_count-aw_before,
                    r_count-r_before, w_count-w_before, burst_expected, beats_expected);
         checks++;
+        if (label == "awready_waits_wvalid" && w_only_stalls == w_stalls_before)
+            $fatal(1,"AWREADY-WVALID dependency did not stall W independently");
+        if (label == "w_before_aw" && aw_only_stalls == aw_stalls_before)
+            $fatal(1,"W-before-AW ordering not observed");
+        if (label == "awready_waits_wvalid" || label == "w_before_aw") checks++;
+        if (!read_error && !write_error && !invalid && oracle_remaining != 0)
+            $fatal(1, "%s oracle remaining=%0d",label,oracle_remaining);
+        oracle_active = 0;
         write_reg(32'h0C, 2, 0);
         read_reg(32'h10, 0, status);
         if (status != 0 || irq) $fatal(1, "%s acknowledge failed", label);
@@ -368,6 +481,8 @@ module tb_dma_portable;
         run_case("nine", 'h200, 'h2100, 9);
         run_case("axil_aw_first", 'h200, 'h2100, 16);
         run_case("axil_w_first", 'h200, 'h2100, 16);
+        run_case("awready_waits_wvalid", 'h280, 'h2180, 16);
+        run_case("w_before_aw", 'h2c0, 'h21c0, 8);
         run_case("burst128", 'h300, 'h2200, 128);
         run_case("burst129", 'h400, 'h2300, 129);
         run_case("source_boundary", 'h0FF8, 'h2400, 24);

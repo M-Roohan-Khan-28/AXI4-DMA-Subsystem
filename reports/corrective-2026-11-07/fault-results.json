@@ -1,0 +1,17 @@
+{
+  "old_rtl_new_bench": {
+    "rtl_revision": "7035f579ce8d19d5f06e51b4400789abdf5c22a7",
+    "bench_source": "corrective DMA branch, copied into disposable worktree",
+    "wrapper_exit_code": 1,
+    "observed": "Fatal: DMA completion timeout at 503810 ns in awready_waits_wvalid",
+    "simulation_log": "old-rtl-new-bench/simulation.log"
+  },
+  "source_alias_fault": {
+    "starting_revision": "7035f579ce8d19d5f06e51b4400789abdf5c22a7",
+    "clean_corrective_rtl_revision": "7e6c25d5a72e2f033299a9d9c205e799fd64b721",
+    "mutation": "cur_src <= src_reg & 32'hFFFF_FF00 in disposable worktree",
+    "wrapper_exit_code": 1,
+    "observed": "Fatal: AR oracle mismatch got=00000100/0 expected=00000180/0",
+    "simulation_log": "source-alias-fault/simulation.log"
+  }
+}

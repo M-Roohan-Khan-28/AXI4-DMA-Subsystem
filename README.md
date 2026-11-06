@@ -5,7 +5,8 @@ control interface and a 64-bit AXI4 data path. It copies 0–4096 bytes
 between eight-byte-aligned RAM addresses, splits 1–16-beat INCR bursts at
 both source and destination 4 KiB boundaries, and uses byte strobes for the
 final partial beat. Transfers are sequential: one read burst is buffered,
-then its matching write burst completes before the next pair.
+then its matching write burst completes before the next pair. AW and W
+progress independently; either address or data can be accepted first.
 
 ```mermaid
 flowchart LR
