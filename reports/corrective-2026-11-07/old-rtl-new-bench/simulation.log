@@ -1,0 +1,24 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish exit tb_dma_portable -do "onerror {quit -code 1}; run -all; quit -code 0" 
+# Start time: 03:07:50 on Nov 07,2026
+# Loading sv_std.std
+# Loading work.tb_dma_portable
+# Loading work.axi4_dma_subsystem
+# onerror {quit -code 1}
+#  Warning: onerror command for use within macro
+#  run -all
+# DMA_CASE_PASS zero length=0 bursts=0
+# DMA_CASE_PASS one length=1 bursts=1
+# DMA_CASE_PASS eight length=8 bursts=1
+# DMA_CASE_PASS nine length=9 bursts=1
+# DMA_CASE_PASS axil_aw_first length=16 bursts=1
+# DMA_CASE_PASS axil_w_first length=16 bursts=1
+# ** Fatal: DMA completion timeout
+#    Time: 503810 ns  Scope: tb_dma_portable.wait_irq File: C:/R_MIGRATION_BACKUP/Roohan_GitHub_Launch_Kit/Roohan_GitHub_Launch_Kit/build/corrective-faults-2026-11-07/DMA-old-RTL/tb/tb_dma_portable.sv Line: 371
+# ** Note: $finish    : C:/R_MIGRATION_BACKUP/Roohan_GitHub_Launch_Kit/Roohan_GitHub_Launch_Kit/build/corrective-faults-2026-11-07/DMA-old-RTL/tb/tb_dma_portable.sv(371)
+#    Time: 503810 ns  Iteration: 1  Instance: /tb_dma_portable
+# End time: 03:07:52 on Nov 07,2026, Elapsed time: 0:00:02
+# Errors: 1, Warnings: 0
