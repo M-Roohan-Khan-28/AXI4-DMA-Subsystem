@@ -59,7 +59,7 @@ module axi4_dma_subsystem (
     localparam logic [2:0] ERR_NONE = 0, ERR_REQUEST = 1,
                            ERR_READ = 2, ERR_WRITE = 3;
     typedef enum logic [2:0] {
-        IDLE, PLAN, SEND_AR, READ_DATA, SEND_AW, WRITE_DATA, WAIT_B
+        IDLE, PLAN, SEND_AR, READ_DATA, WRITE_CHANNELS, WAIT_B
     } state_t;
     state_t state;
 
@@ -69,6 +69,7 @@ module axi4_dma_subsystem (
     logic [12:0] chunk_bytes;
     logic [63:0] burst_buffer [0:15];
     logic        read_fault;
+    logic        aw_done, w_done;
     logic        done_reg, error_reg;
     logic [2:0]  error_code;
 
@@ -112,10 +113,10 @@ module axi4_dma_subsystem (
     assign m_axi_awlen = {3'b000, beats} - 8'd1;
     assign m_axi_awsize = 3'd3;
     assign m_axi_awburst = 2'b01;
-    assign m_axi_awvalid = (state == SEND_AW);
+    assign m_axi_awvalid = (state == WRITE_CHANNELS) && !aw_done;
     assign m_axi_wdata = burst_buffer[write_index[3:0]];
     assign m_axi_wlast = (write_index == beats - 5'd1);
-    assign m_axi_wvalid = (state == WRITE_DATA);
+    assign m_axi_wvalid = (state == WRITE_CHANNELS) && !w_done;
     assign m_axi_bready = (state == WAIT_B);
     always_comb begin
         m_axi_wstrb = 8'hFF;
@@ -138,6 +139,7 @@ module axi4_dma_subsystem (
             cur_src <= 0; cur_dst <= 0; remaining <= 0;
             beats <= 0; read_index <= 0; write_index <= 0;
             chunk_bytes <= 0; read_fault <= 0;
+            aw_done <= 0; w_done <= 0;
             done_reg <= 0; error_reg <= 0; error_code <= ERR_NONE;
             aw_held <= 0; w_held <= 0; aw_address <= 0;
             w_data <= 0; w_strobes <= 0;
@@ -224,6 +226,8 @@ module axi4_dma_subsystem (
                     read_index <= 0;
                     write_index <= 0;
                     read_fault <= 0;
+                    aw_done <= 0;
+                    w_done <= 0;
                     state <= SEND_AR;
                 end
                 SEND_AR: if (m_axi_arvalid && m_axi_arready) state <= READ_DATA;
@@ -241,17 +245,20 @@ module axi4_dma_subsystem (
                             error_reg <= 1;
                             error_code <= ERR_READ;
                         end else begin
-                            state <= SEND_AW;
+                            state <= WRITE_CHANNELS;
                         end
                     end else read_index <= read_index + 5'd1;
                 end
-                SEND_AW: if (m_axi_awvalid && m_axi_awready) begin
-                    write_index <= 0;
-                    state <= WRITE_DATA;
-                end
-                WRITE_DATA: if (m_axi_wvalid && m_axi_wready) begin
-                    if (write_index == beats - 5'd1) state <= WAIT_B;
-                    else write_index <= write_index + 5'd1;
+                WRITE_CHANNELS: begin
+                    if (m_axi_awvalid && m_axi_awready) aw_done <= 1;
+                    if (m_axi_wvalid && m_axi_wready) begin
+                        if (write_index == beats - 5'd1) w_done <= 1;
+                        else write_index <= write_index + 5'd1;
+                    end
+                    if ((aw_done || (m_axi_awvalid && m_axi_awready)) &&
+                        (w_done || (m_axi_wvalid && m_axi_wready &&
+                                    write_index == beats - 5'd1)))
+                        state <= WAIT_B;
                 end
                 WAIT_B: if (m_axi_bvalid && m_axi_bready) begin
                     if (m_axi_bresp != RESP_OKAY || m_axi_bid != 4'd0) begin

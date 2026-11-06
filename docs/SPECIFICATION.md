@@ -17,6 +17,10 @@ the archived four-channel and descriptor features.
   The engine reads one complete burst into a 16-entry buffer, then writes
   the matching destination burst. At most one read **or** one write burst is
   outstanding at a time. It does not overlap read and write bursts.
+- The write address and data channels start together after the read buffer
+  fills. AWVALID and WVALID are held independently until each handshake;
+  either address or data may be accepted first. The engine waits for both
+  AW acceptance and the final W beat before accepting the B response.
 - Source and destination start addresses must be eight-byte aligned for
   nonzero lengths. Supported length is 0–4096 bytes. A zero length completes
   with no AXI data-bus activity, regardless of the programmed addresses.
@@ -60,13 +64,17 @@ assumption. AXI4 itself does not impose that bound.
 
 ## Verification gate
 
-The self-checking harness models memory as bytes, snapshots the
+The self-checking harness initializes memory from a deterministic pseudorandom
+byte stream, models memory as bytes, snapshots the
 original source bytes for an independent copy oracle, compares every
 destination byte plus guard regions, and separately counts accepted AXI
-addresses/data/responses. Directed tests cover 0, 1, 8, 9, 128, 129 and
+addresses/data/responses. It independently checks every accepted AR/AW
+address and length, and R/W beat progression against the programmed request.
+Directed tests cover 0, 1, 8, 9, 128, 129 and
 4096-byte lengths; both sides of 4 KiB boundaries; invalid requests; busy
 writes; response and acknowledgment behavior; independent channel stalls;
-reset during activity; and injected read and write errors. A fixed-seed
+reset during activity; a subordinate that holds AWREADY low until WVALID;
+write data accepted before its address; and injected read and write errors. A fixed-seed
 variation exercises supported lengths, addresses and stalls. A disposable
 data fault must make the runner exit nonzero.
 

@@ -1,12 +1,14 @@
 # Verification plan and implemented checks
 
 The portable ModelSim bench uses a byte-addressable responder and an
-independent copy oracle. For each scenario it initializes a source and
+independent copy oracle. For each scenario it initializes a deterministic
+pseudorandom source and
 destination memory image, snapshots the original bytes, computes the
 expected destination from the programmed addresses and length, then compares
 all 32,768 bytes after completion. The oracle does not read DUT state,
 counters or burst-buffer contents. It also tracks **accepted** AR, R, AW,
-W and B handshakes separately.
+W and B handshakes separately, checking every address, burst length and
+data-beat progression against the programmed request.
 
 | Requirement | Check in `tb/tb_dma_portable.sv` |
 | --- | --- |
@@ -19,6 +21,7 @@ W and B handshakes separately.
 | Busy write/start/ack policy | 4096-byte case attempts all three while active and expects `SLVERR` |
 | AXI4-Lite independent AW/W | Address-first and data-first register writes |
 | AXI4 output stability under stalls | Passive AW, AR and W payload-stability monitors |
+| Independent AXI4 AW/W completion | AWREADY waits for WVALID; one-beat W-before-AW acceptance; independent stalls and exactly one B response |
 | Reset in one shared domain | Reset during first accepted read burst, then status and memory check |
 | Liveness in test environment | Finite per-case and global watchdogs plus a 120-second wrapper timeout |
 
@@ -45,5 +48,5 @@ python scripts/check_provenance.py
 The wrapper requires a fresh output directory, compiles the bounded RTL and
 bench, enforces a wall timeout, checks process exit and simulator fatal/error
 markers, requires `$finish` and zero simulator errors, and records JSON.
-An intentional disposable data fault is used separately to verify that
-the regression exits nonzero.
+Disposable old-RTL and source-address-aliasing faults are used separately to
+verify that the new directed test and independent oracle exit nonzero.
