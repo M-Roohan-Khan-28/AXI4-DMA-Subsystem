@@ -39,22 +39,29 @@ module tb_dma_portable;
     logic [63:0] w_hold_data;
     logic w_hold_last;
     bit oracle_active, oracle_ar_seen, oracle_aw_seen;
-    bit aw_waits_wvalid, w_before_aw_mode, early_w_done;
-    logic [63:0] early_w_data;
-    logic [7:0] early_w_strb;
+    bit aw_waits_wvalid, w_before_aw_mode, same_cycle_mode;
+    logic [63:0] early_w_data [0:15];
+    logic [7:0] early_w_strb [0:15];
+    logic early_w_last [0:15];
+    int early_w_count, pre_aw_target, simultaneous_aw_w;
     int aw_only_stalls, w_only_stalls;
     int oracle_src, oracle_dst, oracle_remaining, oracle_chunk;
     int oracle_r_index, oracle_w_index, oracle_beats;
+    string case_filter;
 
     assign m_axi_awready = aresetn && !write_active && !b_pending &&
                            !m_axi_bvalid && ((cycle_count % 5) != 0) &&
                            (!aw_waits_wvalid || m_axi_wvalid) &&
-                           (!w_before_aw_mode || early_w_done);
+                           (!w_before_aw_mode || early_w_count >= pre_aw_target) &&
+                           (!same_cycle_mode || m_axi_wvalid);
     assign m_axi_arready = aresetn && !read_active && !m_axi_rvalid &&
                            ((cycle_count % 7) != 0);
-    assign m_axi_wready = aresetn &&
-                          (write_active || (w_before_aw_mode && !early_w_done && !b_pending)) &&
-                          ((cycle_count % 4) != 0);
+    assign m_axi_wready = aresetn && !b_pending &&
+                          (write_active ||
+                           (w_before_aw_mode && early_w_count < pre_aw_target) ||
+                           (same_cycle_mode && !write_active && m_axi_awvalid)) &&
+                          ((same_cycle_mode && !write_active) ? m_axi_awready :
+                           ((cycle_count % 4) != 0));
 
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
@@ -66,7 +73,7 @@ module tb_dma_portable;
             m_axi_rlast <= 0; m_axi_rid <= 0;
             m_axi_bvalid <= 0; m_axi_bresp <= 0; m_axi_bid <= 0;
             aw_stalled <= 0; ar_stalled <= 0; w_stalled <= 0;
-            early_w_done <= 0;
+            early_w_count <= 0;
         end else begin
             cycle_count <= cycle_count + 1;
             if (m_axi_awvalid && !m_axi_awready && m_axi_wvalid && m_axi_wready)
@@ -172,16 +179,25 @@ module tb_dma_portable;
                 write_addr <= int'(m_axi_awaddr);
                 write_beats <= int'(m_axi_awlen) + 1;
                 write_index <= 0;
-                if (w_before_aw_mode && early_w_done) begin
-                    if (m_axi_awlen != 0) $fatal(1,"W-first model only supports one beat");
+                // AW and W are independently accepted. Previously accepted W
+                // beats are buffered by the responder and committed only now.
+                for (int beat=0; beat<early_w_count; beat++) begin
+                    if (early_w_last[beat] !== (beat == int'(m_axi_awlen)))
+                        $fatal(1,"Buffered WLAST mismatch beat=%0d",beat);
                     for (int lane=0; lane<8; lane++)
-                        if (early_w_strb[lane]) begin
-                            mem[int'(m_axi_awaddr)+lane] <= early_w_data[lane*8 +: 8];
+                        if (early_w_strb[beat][lane]) begin
+                            mem[int'(m_axi_awaddr)+beat*8+lane] <=
+                                early_w_data[beat][lane*8 +: 8];
                             written_bytes++;
                         end
+                end
+                write_index <= early_w_count;
+                if (early_w_count == int'(m_axi_awlen)+1) begin
                     b_pending <= 1;
                     b_delay <= 4;
+                    write_active <= 0;
                 end else write_active <= 1;
+                if (m_axi_wvalid && m_axi_wready) simultaneous_aw_w++;
                 aw_count <= aw_count + 1;
                 protocol_checks++;
             end
@@ -204,20 +220,24 @@ module tb_dma_portable;
                     end
                     oracle_w_index++;
                 end
-                if (w_before_aw_mode && !write_active) begin
-                    if (!m_axi_wlast) $fatal(1,"Expected one W-first beat");
-                    early_w_data <= m_axi_wdata;
-                    early_w_strb <= m_axi_wstrb;
-                    early_w_done <= 1;
+                if (!write_active && !(m_axi_awvalid && m_axi_awready)) begin
+                    if (early_w_count >= 16) $fatal(1,"Early W queue overflow");
+                    early_w_data[early_w_count] <= m_axi_wdata;
+                    early_w_strb[early_w_count] <= m_axi_wstrb;
+                    early_w_last[early_w_count] <= m_axi_wlast;
+                    early_w_count <= early_w_count + 1;
                 end else begin
-                if (m_axi_wlast !== (write_index == write_beats - 1))
+                if (m_axi_wlast !== (write_index ==
+                    ((m_axi_awvalid && m_axi_awready) ? int'(m_axi_awlen) : write_beats-1)))
                     $fatal(1, "WLAST mismatch beat=%0d total=%0d", write_index, write_beats);
                 for (int lane = 0; lane < 8; lane++)
                     if (m_axi_wstrb[lane]) begin
-                        mem[write_addr + write_index*8 + lane] <= m_axi_wdata[lane*8 +: 8];
+                        mem[((m_axi_awvalid && m_axi_awready) ? int'(m_axi_awaddr) : write_addr)
+                            + write_index*8 + lane] <= m_axi_wdata[lane*8 +: 8];
                         written_bytes++;
                     end
-                if (write_index == write_beats - 1) begin
+                if (write_index ==
+                    ((m_axi_awvalid && m_axi_awready) ? int'(m_axi_awlen) : write_beats-1)) begin
                     write_active <= 0;
                     b_pending <= 1;
                     b_delay <= 4;
@@ -245,6 +265,7 @@ module tb_dma_portable;
                 end
                 m_axi_bvalid <= 0;
                 b_pending <= 0;
+                early_w_count <= 0;
                 protocol_checks++;
             end
         end
@@ -258,7 +279,8 @@ module tb_dma_portable;
         s_axil_bready = 0; s_axil_araddr = 0; s_axil_arvalid = 0;
         s_axil_rready = 0;
         inject_read_error = 0; inject_write_error = 0;
-        aw_waits_wvalid = 0; w_before_aw_mode = 0;
+        aw_waits_wvalid = 0; w_before_aw_mode = 0; same_cycle_mode = 0;
+        pre_aw_target = 0; simultaneous_aw_w = 0;
         aresetn = 0;
         repeat (3) @(negedge aclk);
         init_rng = 32'h28A6_BEEF;
@@ -376,10 +398,12 @@ module tb_dma_portable;
                             input int len, input bit read_error = 0,
                             input bit write_error = 0, input bit busy_probe = 0);
         int ar_before, aw_before, r_before, w_before, bytes_before;
-        int aw_stalls_before, w_stalls_before;
+        int aw_stalls_before, w_stalls_before, simultaneous_before;
         int bytes_to_copy, burst_expected, beats_expected;
         logic [31:0] status, code;
         bit invalid;
+        if (case_filter != "" && case_filter != label) return;
+        $display("DMA_CASE_START %s time=%0t seed=0x28A6BEEF",label,$time);
         reset_case();
         invalid = len > 4096 || ((src % 8) != 0) || ((dst % 8) != 0) ||
                   ((len > 0) && (({1'b0,src[31:0]} + len > 33'h1_0000_0000) ||
@@ -393,6 +417,7 @@ module tb_dma_portable;
         bytes_before = written_bytes;
         aw_stalls_before = aw_only_stalls;
         w_stalls_before = w_only_stalls;
+        simultaneous_before = simultaneous_aw_w;
         if (label == "axil_aw_first") write_reg_split(32'h00, src, 1);
         else if (label == "axil_w_first") write_reg_split(32'h00, src, 0);
         else write_reg(32'h00, src, 0);
@@ -402,7 +427,15 @@ module tb_dma_portable;
         oracle_ar_seen = 0; oracle_aw_seen = 0;
         oracle_r_index = 0; oracle_w_index = 0; oracle_active = 1;
         aw_waits_wvalid = (label == "awready_waits_wvalid");
-        w_before_aw_mode = (label == "w_before_aw");
+        w_before_aw_mode = (label == "w_before_aw" ||
+                            label == "all_w_before_aw_1" ||
+                            label == "all_w_before_aw_2" ||
+                            label == "all_w_before_aw_16");
+        pre_aw_target = (label == "w_before_aw") ? 1 :
+                        w_before_aw_mode ? (len+7)/8 : 0;
+        same_cycle_mode = (label == "same_cycle_1" ||
+                           label == "same_cycle_2" ||
+                           label == "same_cycle_16");
         read_reg(32'h00, 0, status);
         if (status !== src) $fatal(1, "%s source register readback", label);
         read_reg(32'h04, 0, status);
@@ -449,9 +482,11 @@ module tb_dma_portable;
         checks++;
         if (label == "awready_waits_wvalid" && w_only_stalls == w_stalls_before)
             $fatal(1,"AWREADY-WVALID dependency did not stall W independently");
-        if (label == "w_before_aw" && aw_only_stalls == aw_stalls_before)
+        if (w_before_aw_mode && aw_only_stalls == aw_stalls_before)
             $fatal(1,"W-before-AW ordering not observed");
-        if (label == "awready_waits_wvalid" || label == "w_before_aw") checks++;
+        if (same_cycle_mode && simultaneous_aw_w == simultaneous_before)
+            $fatal(1,"Same-cycle AW/W acceptance not observed");
+        if (label == "awready_waits_wvalid" || w_before_aw_mode || same_cycle_mode) checks++;
         if (!read_error && !write_error && !invalid && oracle_remaining != 0)
             $fatal(1, "%s oracle remaining=%0d",label,oracle_remaining);
         oracle_active = 0;
@@ -460,7 +495,7 @@ module tb_dma_portable;
         if (status != 0 || irq) $fatal(1, "%s acknowledge failed", label);
         checks++;
         cases++;
-        $display("DMA_CASE_PASS %s length=%0d bursts=%0d", label, len, burst_expected);
+        $display("DMA_CASE_PASS %s length=%0d bursts=%0d time=%0t", label, len, burst_expected,$time);
     endtask
 
     initial begin
@@ -471,22 +506,36 @@ module tb_dma_portable;
     initial begin
         logic [31:0] value;
         int unsigned rng;
+        if (!$value$plusargs("CASE=%s",case_filter)) case_filter = "";
         reset_case();
         read_reg(32'h18, 2'b10, value);
         write_reg(32'h18, 32'h1, 2'b10);
         write_reg(32'h00, 32'h1234, 2'b10, 4'b0001);
         run_case("zero", 3, 5, 0);
         run_case("one", 'h100, 'h2000, 1);
+        run_case("tail2", 'h100, 'h2000, 2);
+        run_case("tail3", 'h100, 'h2000, 3);
+        run_case("tail4", 'h100, 'h2000, 4);
+        run_case("tail5", 'h100, 'h2000, 5);
+        run_case("tail6", 'h100, 'h2000, 6);
+        run_case("tail7", 'h100, 'h2000, 7);
         run_case("eight", 'h180, 'h2080, 8);
         run_case("nine", 'h200, 'h2100, 9);
         run_case("axil_aw_first", 'h200, 'h2100, 16);
         run_case("axil_w_first", 'h200, 'h2100, 16);
         run_case("awready_waits_wvalid", 'h280, 'h2180, 16);
         run_case("w_before_aw", 'h2c0, 'h21c0, 8);
+        run_case("all_w_before_aw_1", 'h2c0, 'h21c0, 8);
+        run_case("all_w_before_aw_2", 'h2d0, 'h21d0, 16);
+        run_case("all_w_before_aw_16", 'h300, 'h2200, 128);
+        run_case("same_cycle_1", 'h310, 'h2210, 8);
+        run_case("same_cycle_2", 'h320, 'h2220, 16);
+        run_case("same_cycle_16", 'h400, 'h2300, 128);
         run_case("burst128", 'h300, 'h2200, 128);
         run_case("burst129", 'h400, 'h2300, 129);
         run_case("source_boundary", 'h0FF8, 'h2400, 24);
         run_case("destination_boundary", 'h500, 'h2FF8, 24);
+        run_case("both_boundaries", 'h0FF8, 'h2FF8, 24);
         run_case("max4096_busy", 'h1000, 'h4000, 4096, 0, 0, 1);
         run_case("bad_source_alignment", 'h101, 'h3000, 8);
         run_case("bad_destination_alignment", 'h100, 'h3001, 8);
@@ -496,6 +545,8 @@ module tb_dma_portable;
         run_case("destination_overflow", 'h100, 'hFFFF_FFF8, 16);
         run_case("read_error", 'h100, 'h3000, 24, 1, 0);
         run_case("write_error", 'h100, 'h3000, 24, 0, 1);
+        if (case_filter == "" || case_filter == "reset_during_read") begin
+        $display("DMA_CASE_START reset_during_read time=%0t seed=0x28A6BEEF",$time);
         reset_case();
         write_reg(32'h00, 'h1000, 0);
         write_reg(32'h04, 'h4000, 0);
@@ -522,13 +573,16 @@ module tb_dma_portable;
             if (mem[j] !== expected[j]) $fatal(1, "Reset test changed memory at %h", j);
             else checks++;
         cases++;
-        $display("DMA_CASE_PASS reset_during_read");
+        $display("DMA_CASE_PASS reset_during_read time=%0t",$time);
+        end
         rng = 32'h28A6_BEEF;
         for (int k = 0; k < 5; k++) begin
             rng = rng * 32'd1664525 + 32'd1013904223;
             run_case($sformatf("seeded_%0d", k), 32'h800 + ((rng[7:0] & 8'hF8)),
                      32'h5000 + ((rng[15:8] & 8'hF8)), 1 + int'(rng[11:0]));
         end
+        if (case_filter != "" && cases != 1)
+            $fatal(1,"DMA_CASE_SELECTION_MISSING %s cases=%0d",case_filter,cases);
         $display("DMA_REGRESSION_PASS cases=%0d checks=%0d seed=0x28A6BEEF",
                  cases, checks + protocol_checks);
         $finish;
