@@ -1,0 +1,8 @@
+{
+    "source_revision":  "a2148a1e817b0981714962264e3af4a7fb838ea6",
+    "fault":  "aw tracker",
+    "target_case":  "burst128",
+    "mutant_sha256":  "8C808BB80C1A89CB484D61B816CC86335305DF92ECEDF6CF97C82275DF99D184",
+    "wrapper_exit_code":  1,
+    "fatal":  "# ** Fatal: DMA completion timeout"
+}

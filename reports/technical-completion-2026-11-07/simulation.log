@@ -1,0 +1,95 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish exit tb_dma_portable -do "run -all; quit -code 0" 
+# Start time: 22:07:42 on Nov 07,2026
+# Loading sv_std.std
+# Loading work.tb_dma_portable
+# Loading work.axi4_dma_subsystem
+# run -all
+# DMA_CASE_START zero time=160000 seed=0x28A6BEEF
+# DMA_CASE_PASS zero length=0 bursts=0 time=590000
+# DMA_CASE_START one time=590000 seed=0x28A6BEEF
+# DMA_CASE_PASS one length=1 bursts=1 time=1150000
+# DMA_CASE_START tail2 time=1150000 seed=0x28A6BEEF
+# DMA_CASE_PASS tail2 length=2 bursts=1 time=1710000
+# DMA_CASE_START tail3 time=1710000 seed=0x28A6BEEF
+# DMA_CASE_PASS tail3 length=3 bursts=1 time=2270000
+# DMA_CASE_START tail4 time=2270000 seed=0x28A6BEEF
+# DMA_CASE_PASS tail4 length=4 bursts=1 time=2830000
+# DMA_CASE_START tail5 time=2830000 seed=0x28A6BEEF
+# DMA_CASE_PASS tail5 length=5 bursts=1 time=3390000
+# DMA_CASE_START tail6 time=3390000 seed=0x28A6BEEF
+# DMA_CASE_PASS tail6 length=6 bursts=1 time=3950000
+# DMA_CASE_START tail7 time=3950000 seed=0x28A6BEEF
+# DMA_CASE_PASS tail7 length=7 bursts=1 time=4510000
+# DMA_CASE_START eight time=4510000 seed=0x28A6BEEF
+# DMA_CASE_PASS eight length=8 bursts=1 time=5070000
+# DMA_CASE_START nine time=5070000 seed=0x28A6BEEF
+# DMA_CASE_PASS nine length=9 bursts=1 time=5650000
+# DMA_CASE_START axil_aw_first time=5650000 seed=0x28A6BEEF
+# DMA_CASE_PASS axil_aw_first length=16 bursts=1 time=6260000
+# DMA_CASE_START axil_w_first time=6260000 seed=0x28A6BEEF
+# DMA_CASE_PASS axil_w_first length=16 bursts=1 time=6870000
+# DMA_CASE_START awready_waits_wvalid time=6870000 seed=0x28A6BEEF
+# DMA_CASE_PASS awready_waits_wvalid length=16 bursts=1 time=7450000
+# DMA_CASE_START w_before_aw time=7450000 seed=0x28A6BEEF
+# DMA_CASE_PASS w_before_aw length=8 bursts=1 time=7990000
+# DMA_CASE_START all_w_before_aw_1 time=7990000 seed=0x28A6BEEF
+# DMA_CASE_PASS all_w_before_aw_1 length=8 bursts=1 time=8530000
+# DMA_CASE_START all_w_before_aw_2 time=8530000 seed=0x28A6BEEF
+# DMA_CASE_PASS all_w_before_aw_2 length=16 bursts=1 time=9120000
+# DMA_CASE_START all_w_before_aw_16 time=9120000 seed=0x28A6BEEF
+# DMA_CASE_PASS all_w_before_aw_16 length=128 bursts=1 time=10310000
+# DMA_CASE_START same_cycle_1 time=10310000 seed=0x28A6BEEF
+# DMA_CASE_PASS same_cycle_1 length=8 bursts=1 time=10850000
+# DMA_CASE_START same_cycle_2 time=10850000 seed=0x28A6BEEF
+# DMA_CASE_PASS same_cycle_2 length=16 bursts=1 time=11420000
+# DMA_CASE_START same_cycle_16 time=11420000 seed=0x28A6BEEF
+# DMA_CASE_PASS same_cycle_16 length=128 bursts=1 time=12600000
+# DMA_CASE_START burst128 time=12600000 seed=0x28A6BEEF
+# DMA_CASE_PASS burst128 length=128 bursts=1 time=13800000
+# DMA_CASE_START burst129 time=13800000 seed=0x28A6BEEF
+# DMA_CASE_PASS burst129 length=129 bursts=2 time=15130000
+# DMA_CASE_START source_boundary time=15130000 seed=0x28A6BEEF
+# DMA_CASE_PASS source_boundary length=24 bursts=2 time=15860000
+# DMA_CASE_START destination_boundary time=15860000 seed=0x28A6BEEF
+# DMA_CASE_PASS destination_boundary length=24 bursts=2 time=16590000
+# DMA_CASE_START both_boundaries time=16590000 seed=0x28A6BEEF
+# DMA_CASE_PASS both_boundaries length=24 bursts=2 time=17320000
+# DMA_CASE_START max4096_busy time=17320000 seed=0x28A6BEEF
+# DMA_CASE_PASS max4096_busy length=4096 bursts=32 time=42690000
+# DMA_CASE_START bad_source_alignment time=42690000 seed=0x28A6BEEF
+# DMA_CASE_PASS bad_source_alignment length=8 bursts=0 time=43120000
+# DMA_CASE_START bad_destination_alignment time=43120000 seed=0x28A6BEEF
+# DMA_CASE_PASS bad_destination_alignment length=8 bursts=0 time=43550000
+# DMA_CASE_START overlap time=43550000 seed=0x28A6BEEF
+# DMA_CASE_PASS overlap length=32 bursts=0 time=43980000
+# DMA_CASE_START too_long time=43980000 seed=0x28A6BEEF
+# DMA_CASE_PASS too_long length=4097 bursts=0 time=44410000
+# DMA_CASE_START source_overflow time=44410000 seed=0x28A6BEEF
+# DMA_CASE_PASS source_overflow length=16 bursts=0 time=44840000
+# DMA_CASE_START destination_overflow time=44840000 seed=0x28A6BEEF
+# DMA_CASE_PASS destination_overflow length=16 bursts=0 time=45270000
+# DMA_CASE_START read_error time=45270000 seed=0x28A6BEEF
+# DMA_CASE_PASS read_error length=24 bursts=1 time=45790000
+# DMA_CASE_START write_error time=45790000 seed=0x28A6BEEF
+# DMA_CASE_PASS write_error length=24 bursts=1 time=46410000
+# DMA_CASE_START reset_during_read time=46410000 seed=0x28A6BEEF
+# DMA_CASE_PASS reset_during_read time=46730000
+# DMA_CASE_START seeded_0 time=46730000 seed=0x28A6BEEF
+# DMA_CASE_PASS seeded_0 length=3971 bursts=32 time=71450000
+# DMA_CASE_START seeded_1 time=71450000 seed=0x28A6BEEF
+# DMA_CASE_PASS seeded_1 length=2298 bursts=19 time=85990000
+# DMA_CASE_START seeded_2 time=85990000 seed=0x28A6BEEF
+# DMA_CASE_PASS seeded_2 length=3589 bursts=29 time=108370000
+# DMA_CASE_START seeded_3 time=108370000 seed=0x28A6BEEF
+# DMA_CASE_PASS seeded_3 length=404 bursts=4 time=111350000
+# DMA_CASE_START seeded_4 time=111350000 seed=0x28A6BEEF
+# DMA_CASE_PASS seeded_4 length=2519 bursts=21 time=127210000
+# DMA_REGRESSION_PASS cases=40 checks=1352655 seed=0x28A6BEEF
+# ** Note: $finish    : C:/R_MIGRATION_BACKUP/Roohan_GitHub_Launch_Kit/Roohan_GitHub_Launch_Kit/build/tc/dma/tb/tb_dma_portable.sv(588)
+#    Time: 127210 ns  Iteration: 1  Instance: /tb_dma_portable
+# End time: 22:07:42 on Nov 07,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0

@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "origin": "simulator",
+  "source_filename": "dma-order.vcd",
+  "source_sha256": "78b88e01dbeedb9dd9261bf694aad193ef11c5972567a18d75d1dc935747ce29",
+  "timescale": "1ps",
+  "start_tick": 0,
+  "end_tick": 740000,
+  "source_final_tick": 740000,
+  "signals": [
+    {
+      "name": "tb_dma_portable.aclk",
+      "code": "!",
+      "width": 1,
+      "kind": "reg",
+      "bit_range": ""
+    },
+    {
+      "name": "tb_dma_portable.aresetn",
+      "code": "\"",
+      "width": 1,
+      "kind": "reg",
+      "bit_range": ""
+    },
+    {
+      "name": "tb_dma_portable.m_axi_awvalid",
+      "code": "#",
+      "width": 1,
+      "kind": "reg",
+      "bit_range": ""
+    },
+    {
+      "name": "tb_dma_portable.m_axi_awready",
+      "code": "$",
+      "width": 1,
+      "kind": "reg",
+      "bit_range": ""
+    },
+    {
+      "name": "tb_dma_portable.m_axi_wvalid",
+      "code": "%",
+      "width": 1,
+      "kind": "reg",
+      "bit_range": ""
+    },
+    {
+      "name": "tb_dma_portable.m_axi_wready",
+      "code": "&",
+      "width": 1,
+      "kind": "reg",
+      "bit_range": ""
+    },
+    {
+      "name": "tb_dma_portable.m_axi_wlast",
+      "code": "'",
+      "width": 1,
+      "kind": "reg",
+      "bit_range": ""
+    },
+    {
+      "name": "tb_dma_portable.m_axi_bvalid",
+      "code": "(",
+      "width": 1,
+      "kind": "reg",
+      "bit_range": ""
+    },
+    {
+      "name": "tb_dma_portable.m_axi_bready",
+      "code": ")",
+      "width": 1,
+      "kind": "reg",
+      "bit_range": ""
+    }
+  ],
+  "same_tick_collapses": 0,
+  "functional_result": "NOT_ASSESSED_BY_RENDERER"
+}

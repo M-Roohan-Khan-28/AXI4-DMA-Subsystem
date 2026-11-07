@@ -77,3 +77,52 @@ alias (`cur_src <= src_reg & 32'hFFFF_FF00`) with the corrected RTL triggered
 `old-rtl-new-bench/` and `source-alias-fault/` folders. These failures are
 intentional and are not counted as passing regressions. Full AXI4 protocol
 compliance and measured coverage remain outside this bounded milestone.
+
+## Full-burst channel-ordering qualification — 7 November 2026
+
+Tested source/runner/inventory commit:
+`a2148a1e817b0981714962264e3af4a7fb838ea6`, clean worktree.
+ModelSim Intel FPGA Starter Edition `vsim 2020.1 Simulator 2020.02
+Feb 28 2020`, seed `0x28A6BEEF`. The fresh full run passed the
+[exact 40-case inventory](../tests/required_cases.json) with **1,352,655**
+check observations and wrapper exit **0**. Its source SHA-256 values, actual
+command, simulator banner, raw compile/simulation logs, terminal markers
+and JSON are in [`reports/technical-completion-2026-11-07/`](../reports/technical-completion-2026-11-07/).
+
+The new responder buffers up to 16 accepted W beats before AW. Selected
+1-, 2- and 16-beat cases passed with all W before AW; separate cases passed
+same-cycle AW/first-W acceptance. The earlier 27 cases remain, with all
+final-byte tails 1–7 and a coincident source/destination 4 KiB split added.
+The independent request oracle compares every accepted address, length,
+beat, strobe and byte against the programmed request; full memory and guard
+bytes are compared after each case. These are check totals, not measured
+functional or code coverage.
+
+Four selected passing case runs captured real VCDs and
+[VCD-derived SVGs](../reports/technical-completion-2026-11-07/) for
+`all_w_before_aw_16`, `same_cycle_16`, `awready_waits_wvalid` and
+`both_boundaries`. Each adjacent metadata JSON records source VCD SHA-256,
+top, tick unit, signal map and actual interval. The renderer does not itself
+judge functional PASS.
+
+Two disposable RTL tracker faults had targeted nonzero wrapper results:
+forcing `aw_done` low caused `burst128` to time out; forcing `w_done` low
+caused `all_w_before_aw_16` to time out. Each had the named simulator fatal
+`DMA completion timeout`; their fault directories contain mutant sources,
+hashes, compile/simulation logs, JSON and wrapper-exit summaries. A separate
+AW-tracker mutant in an all-W-before-AW case passed because the AW and final W
+dependencies were both met on the AW edge; the AW-first `burst128` target
+was therefore used to qualify that tracker. No mutant entered the branch.
+The prior old-RTL and source-alias controls remain in their historical paths.
+
+Reproduce full inventory from this commit with fresh output:
+
+```powershell
+$env:MODELSIM_BIN = 'C:\intelFPGA\20.1\modelsim_ase\win32aloem'
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/run_regression.ps1 -OutputDir C:\short\dma-full-unique
+if ($LASTEXITCODE -ne 0) { throw 'DMA regression failed or blocked' }
+```
+
+Response-error position, wrong-ID and malformed-RLAST matrices, additional
+CSR/reset phases, UVM, SVA, coverage closure and full AXI4 compliance remain
+open. No synthesis, timing, FPGA or hardware evidence is claimed.

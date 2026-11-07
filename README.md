@@ -8,6 +8,15 @@ final partial beat. Transfers are sequential: one read burst is buffered,
 then its matching write burst completes before the next pair. AW and W
 progress independently; either address or data can be accepted first.
 
+The latest technical-completion branch qualified **40 named cases and
+1,352,655 checks** at tested source `a2148a1e817b0981714962264e3af4a7fb838ea6`.
+It includes 1-, 2- and 16-beat all-W-before-AW and same-cycle AW/W ordering,
+all final-byte tails 1–7, and coincident 4 KiB splits. Two disposable
+AW/W-progress tracker faults returned nonzero. Raw logs, JSON and four
+[measured waveform figures](reports/technical-completion-2026-11-07/)
+are separate from the earlier published 27-case milestone. This branch has
+not yet passed a new published locked aggregate.
+
 ```mermaid
 flowchart LR
   Host[AXI4-Lite host] --> CSR[Control and status registers]
@@ -38,6 +47,9 @@ The simulation wrapper returns nonzero on compile errors, simulator errors,
 missing completion, check failures, or timeout. The bench uses a fixed seed
 and has its own watchdog. See [RESULTS.md](docs/RESULTS.md) for observed
 counts and limits.
+
+Use `-Case all_w_before_aw_16 -CaptureWave` with a fresh output directory
+for a targeted VCD/SVG. The default run enforces the exact 40-case inventory.
 
 ## Provenance and limits
 

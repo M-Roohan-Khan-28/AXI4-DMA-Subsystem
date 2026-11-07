@@ -1,0 +1,27 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish exit tb_dma_portable "+CASE=awready_waits_wvalid" -do "vcd file dma-order.vcd; vcd add /tb_dma_portable/aclk; vcd add /tb_dma_portable/aresetn; vcd add /tb_dma_portable/m_axi_awvalid; vcd add /tb_dma_portable/m_axi_awready; vcd add /tb_dma_portable/m_axi_wvalid; vcd add /tb_dma_portable/m_axi_wready; vcd add /tb_dma_portable/m_axi_wlast; vcd add /tb_dma_portable/m_axi_bvalid; vcd add /tb_dma_portable/m_axi_bready; run -all; quit -code 0" 
+# Start time: 22:07:52 on Nov 07,2026
+# Loading sv_std.std
+# Loading work.tb_dma_portable
+# Loading work.axi4_dma_subsystem
+# vcd file dma-order.vcd
+#  vcd add /tb_dma_portable/aclk
+#  vcd add /tb_dma_portable/aresetn
+#  vcd add /tb_dma_portable/m_axi_awvalid
+#  vcd add /tb_dma_portable/m_axi_awready
+#  vcd add /tb_dma_portable/m_axi_wvalid
+#  vcd add /tb_dma_portable/m_axi_wready
+#  vcd add /tb_dma_portable/m_axi_wlast
+#  vcd add /tb_dma_portable/m_axi_bvalid
+#  vcd add /tb_dma_portable/m_axi_bready
+#  run -all
+# DMA_CASE_START awready_waits_wvalid time=160000 seed=0x28A6BEEF
+# DMA_CASE_PASS awready_waits_wvalid length=16 bursts=1 time=740000
+# DMA_REGRESSION_PASS cases=1 checks=32835 seed=0x28A6BEEF
+# ** Note: $finish    : C:/R_MIGRATION_BACKUP/Roohan_GitHub_Launch_Kit/Roohan_GitHub_Launch_Kit/build/tc/dma/tb/tb_dma_portable.sv(588)
+#    Time: 740 ns  Iteration: 1  Instance: /tb_dma_portable
+# End time: 22:07:53 on Nov 07,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0

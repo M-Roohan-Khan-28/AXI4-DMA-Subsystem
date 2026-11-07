@@ -1,0 +1,43 @@
+{
+  "repository": "AXI4-DMA-Subsystem",
+  "source_revision": "a2148a1e817b0981714962264e3af4a7fb838ea6",
+  "source_dirty": false,
+  "sources": [
+    {
+      "path": "C:\\R_MIGRATION_BACKUP\\Roohan_GitHub_Launch_Kit\\Roohan_GitHub_Launch_Kit\\build\\test-runs\\tc-dma-w-tracker-fault.sv",
+      "sha256": "5ef653fe91af8d3f53f9286522c0a8a6979c4a24af53325516a3d33dced62406"
+    },
+    {
+      "path": "C:\\R_MIGRATION_BACKUP\\Roohan_GitHub_Launch_Kit\\Roohan_GitHub_Launch_Kit\\build\\tc\\dma\\tb\\tb_dma_portable.sv",
+      "sha256": "902801acbbac3671afe2188a77379532de14fd48d7e366560b3734875d2dc63c"
+    },
+    {
+      "path": "C:\\R_MIGRATION_BACKUP\\Roohan_GitHub_Launch_Kit\\Roohan_GitHub_Launch_Kit\\build\\tc\\dma\\tests\\required_cases.json",
+      "sha256": "16c4b4d8bf6970b2482c47f1b403e6ce4cae0cdacfb53e0f71b53cc834ec3b92"
+    }
+  ],
+  "seed": "0x28A6BEEF",
+  "case_selection": "all_w_before_aw_16",
+  "timeout_seconds_per_command": 120,
+  "simulations": [
+    {
+      "top": "tb_dma_portable",
+      "command": [
+        "C:\\intelFPGA\\20.1\\modelsim_ase\\win32aloem\\vsim.exe",
+        "-c",
+        "-onfinish",
+        "exit",
+        "tb_dma_portable",
+        "+CASE=all_w_before_aw_16",
+        "-do",
+        "run -all; quit -code 0"
+      ],
+      "simulator_exit_code": 0,
+      "status": "FAIL"
+    }
+  ],
+  "overall": "FAIL",
+  "simulator_version": "Model Technology ModelSim - INTEL FPGA STARTER EDITION vsim 2020.1 Simulator 2020.02 Feb 28 2020",
+  "error": "DMA simulation failed, inventory mismatch or marker missing",
+  "elapsed_seconds": 1.597
+}

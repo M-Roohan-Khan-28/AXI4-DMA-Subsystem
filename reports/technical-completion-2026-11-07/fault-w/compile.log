@@ -1,0 +1,10 @@
+Model Technology ModelSim - Intel FPGA Edition vlog 2020.1 Compiler 2020.02 Feb 28 2020
+Start time: 22:08:47 on Nov 07,2026
+vlog -sv C:\R_MIGRATION_BACKUP\Roohan_GitHub_Launch_Kit\Roohan_GitHub_Launch_Kit\build\test-runs\tc-dma-w-tracker-fault.sv C:\R_MIGRATION_BACKUP\Roohan_GitHub_Launch_Kit\Roohan_GitHub_Launch_Kit\build\tc\dma\tb\tb_dma_portable.sv 
+-- Compiling module axi4_dma_subsystem
+-- Compiling module tb_dma_portable
+
+Top level modules:
+	tb_dma_portable
+End time: 22:08:47 on Nov 07,2026, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0

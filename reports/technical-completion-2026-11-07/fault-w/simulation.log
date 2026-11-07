@@ -1,0 +1,17 @@
+Reading pref.tcl
+
+# 2020.1
+
+# vsim -c -onfinish exit tb_dma_portable "+CASE=all_w_before_aw_16" -do "run -all; quit -code 0" 
+# Start time: 22:08:48 on Nov 07,2026
+# Loading sv_std.std
+# Loading work.tb_dma_portable
+# Loading work.axi4_dma_subsystem
+# run -all
+# DMA_CASE_START all_w_before_aw_16 time=160000 seed=0x28A6BEEF
+# ** Fatal: DMA completion timeout
+#    Time: 500460 ns  Scope: tb_dma_portable.wait_irq File: C:/R_MIGRATION_BACKUP/Roohan_GitHub_Launch_Kit/Roohan_GitHub_Launch_Kit/build/tc/dma/tb/tb_dma_portable.sv Line: 393
+# ** Note: $finish    : C:/R_MIGRATION_BACKUP/Roohan_GitHub_Launch_Kit/Roohan_GitHub_Launch_Kit/build/tc/dma/tb/tb_dma_portable.sv(393)
+#    Time: 500460 ns  Iteration: 1  Instance: /tb_dma_portable
+# End time: 22:08:48 on Nov 07,2026, Elapsed time: 0:00:00
+# Errors: 1, Warnings: 0

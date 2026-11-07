@@ -22,6 +22,9 @@ data-beat progression against the programmed request.
 | AXI4-Lite independent AW/W | Address-first and data-first register writes |
 | AXI4 output stability under stalls | Passive AW, AR and W payload-stability monitors |
 | Independent AXI4 AW/W completion | AWREADY waits for WVALID; one-beat W-before-AW acceptance; independent stalls and exactly one B response |
+| Full-burst AW/W ordering | `all_w_before_aw_1/2/16` and `same_cycle_1/2/16`; responder buffers up to 16 early W beats and compares every accepted beat with the independent programmed-request oracle |
+| Every final-byte tail | `one`, `tail2` through `tail7`, `eight`, `nine`, `burst129` |
+| Coincident source/destination 4 KiB split | `both_boundaries` |
 | Reset in one shared domain | Reset during first accepted read burst, then status and memory check |
 | Liveness in test environment | Finite per-case and global watchdogs plus a 120-second wrapper timeout |
 
@@ -32,11 +35,22 @@ lengths, aligned addresses, and bus stalls. The responder changes
 cycle schedules. These are reproducible variations, not measured functional
 coverage.
 
+The current [40-case required inventory](../tests/required_cases.json) is
+an exact runner gate: each case must emit one start and one pass marker in
+the listed order. A `-Case` selection supports isolated targeted runs and
+bounded measured waveform capture. The new responder queues accepted W
+payloads until AW is accepted; it does not infer expected data from the DMA
+buffer. See [current results](RESULTS.md) for the source revision, four
+actual VCD-derived figures and AW/W-tracker fault controls.
+
 The source responder may write an accepted burst before returning a write
 error. The oracle expects that explicitly. A read error on the first burst
 stops before the corresponding destination write. The testbench does not
 cover every legal AXI4 timing combination, multi-ID traffic, interconnect
-arbitration, descriptors, or hardware behavior.
+arbitration, descriptors, or hardware behavior. Response-error
+position/ID/RLAST matrices, more CSR/reset phases, functional/code coverage
+and UVM remain open. The two original advanced ALU/APB suites are separate
+licence-blocked NOT RUN items.
 
 Run from a clean checkout with ModelSim 2020.1 executables on PATH:
 
