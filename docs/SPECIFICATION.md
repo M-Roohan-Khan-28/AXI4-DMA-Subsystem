@@ -62,6 +62,14 @@ Reset clears control state and outputs; the test responder shares the reset.
 The testbench enforces a finite completion bound as a **test environment**
 assumption. AXI4 itself does not impose that bound.
 
+The qualification responder accepts legal W-before-AW traffic through a
+16-beat queue. Its AWREADY can be held until all W beats are accepted; a
+separate mode accepts AW and the first W on the same edge. Those are
+responder test modes, not a new DMA RTL capability. Reset is shared between
+DMA and responder. Already accepted external writes are not undone by reset;
+the current reset case interrupts a read before destination commits. Reset
+after a write commit remains a separately required scenario.
+
 ## Verification gate
 
 The self-checking harness initializes memory from a deterministic pseudorandom
@@ -70,12 +78,14 @@ original source bytes for an independent copy oracle, compares every
 destination byte plus guard regions, and separately counts accepted AXI
 addresses/data/responses. It independently checks every accepted AR/AW
 address and length, and R/W beat progression against the programmed request.
-Directed tests cover 0, 1, 8, 9, 128, 129 and
+Directed tests cover 0, every tail length 1–7, 8, 9, 128, 129 and
 4096-byte lengths; both sides of 4 KiB boundaries; invalid requests; busy
 writes; response and acknowledgment behavior; independent channel stalls;
 reset during activity; a subordinate that holds AWREADY low until WVALID;
 write data accepted before its address; and injected read and write errors. A fixed-seed
-variation exercises supported lengths, addresses and stalls. A disposable
+variation exercises supported lengths, addresses and stalls. The exact
+required list is in [`tests/required_cases.json`](../tests/required_cases.json).
+A disposable
 data fault must make the runner exit nonzero.
 
 Only actually executed checks and real simulator logs will be reported as
