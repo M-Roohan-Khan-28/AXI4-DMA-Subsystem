@@ -1,16 +1,18 @@
 # AXI4 DMA Subsystem
 
-## Separate deterministic UVM/SVA review milestone
+## Separate deterministic UVM/SVA milestone — merged
 
-The [adapter and run guide](docs/DETERMINISTIC_UVM_ADAPTER.md) links the corrected
-AMBA-hosted UVM environment and fresh detached evidence: **47/47 required PASS**,
-68 scenarios, 30 SVA controls and ten qualified nonzero fault children. Enabled
-WDATA lanes and rejected-CSR side effects have targeted old/new qualification.
-Three new measured crops have verified original-capture hashes. The original
-43-substep report, 40-case portable result and 11-file provenance are preserved;
-no DUT or portable-test input changed. Coverage, constrained randomization and
-original advanced ALU/APB environments remain NOT RUN. Both PRs are open and
-unmerged; this separate review milestone preserves the portable release below.
+The [adapter and run guide](docs/DETERMINISTIC_UVM_ADAPTER.md) links the
+[merged-source AMBA evidence](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/SUMMARY.md): **47/47 required PASS**,
+68 scenarios in seven groups, 30 SVA controls and ten fault parents whose
+children each exit 1. Aggregate and outer wrapper exit 0. The enabled-lane WDATA
+and rejected-CSR findings are resolved, with old/new controls preserved.
+The tested AMBA merge is `54833a559d7afbc741c08f41f7df6b3dd24a2b52`;
+the DUT remains locked to `a2d3d57edaa9eb441f3289bf5320f4df2f074144`.
+Both reviewed milestone PRs are merged. New captures have verified byte provenance.
+The original/corrective reports, 40-case portable result and 11-file provenance
+are unchanged. Coverage, constrained randomization and original advanced ALU/APB
+remain **NOT RUN**; supported-contract and physical-implementation limits remain.
 
 A bounded single-channel, memory-to-memory DMA with a 32-bit AXI4-Lite
 control interface and a 64-bit AXI4 data path. It copies 0–4096 bytes
