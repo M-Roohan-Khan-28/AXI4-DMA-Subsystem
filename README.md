@@ -1,5 +1,16 @@
 # AXI4 DMA Subsystem
 
+## Separate deterministic UVM/SVA review milestone
+
+The [adapter and run guide](docs/DETERMINISTIC_UVM_ADAPTER.md) links a separate
+AMBA-hosted UVM environment and fresh detached evidence: 43 required substeps
+PASS, 60 functional scenarios, 30 SVA controls, and eight qualified nonzero fault
+children. The DUT is unchanged; its existing 40-case portable regression and
+11-file provenance check also passed. Eight measured waveform figures have
+verified original-capture hashes. Coverage, constrained randomization and the
+original advanced ALU/APB environments remain NOT RUN. This milestone is open
+for review and preserves the portable release below.
+
 A bounded single-channel, memory-to-memory DMA with a 32-bit AXI4-Lite
 control interface and a 64-bit AXI4 data path. It copies 0–4096 bytes
 between eight-byte-aligned RAM addresses, splits 1–16-beat INCR bursts at
