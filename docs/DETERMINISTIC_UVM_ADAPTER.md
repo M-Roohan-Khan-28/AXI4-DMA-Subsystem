@@ -1,11 +1,33 @@
 # Separate deterministic DMA UVM/SVA adapter
 
 The reusable environment is implemented in AMBA-Protocol-Verification, with
-the real RTL in this repository pinned to **`a2d3d57edaa9eb441f3289bf5320f4df2f074144`**. This documentation PR
+the real RTL in this repository pinned to **`a2d3d57edaa9eb441f3289bf5320f4df2f074144`**. This documentation
 does not change RTL, the existing 40-case portable runner, source provenance,
 licences, attribution or historical evidence.
 
-## Corrected tested environment and result — 10 November 2026
+## Merged-source closeout — 10 November 2026
+
+[AMBA #12](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/pull/12) merged at `54833a559d7afbc741c08f41f7df6b3dd24a2b52`;
+[DMA documentation #4](https://github.com/M-Roohan-Khan-28/AXI4-DMA-Subsystem/pull/4) merged at `18f1a822da8ca00b5eb9b8a63c13d6e79123b6f1`.
+The [new immutable report](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/SUMMARY.md), published through
+[AMBA evidence PR #13](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/pull/13) at `5fa38d68d56426fdc01388a5bd885316e867a457`,
+records a fresh detached merged-source **47/47 PASS**, aggregate/outer wrapper
+exit 0. Actual runner and inventory revisions both remain `e6fbb510aa88b1f5aa8a7cc04926eeefbfb5be4d`.
+All 18 execution inputs match the reviewed corrective implementation; DUT lock
+remains `a2d3d57edaa9eb441f3289bf5320f4df2f074144` despite this documentation merge.
+
+The 30 SVA controls, seven groups / 68 scenarios and ten fault qualifications
+all pass. Every fault child exits 1 for its intended diagnostic. All case counts
+match the prior qualified run: 150,777 comparisons, 90 commands = 87 terminals +
+3 reset cancellations, and 102 rejected-write readback checkpoints.
+[Normal-clone reproduction](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/REPRODUCE.md) explicitly detaches at the
+actual merge; no feature branch is required. [Raw results](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/run/results.json),
+[source/input hashes](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/SOURCE_LOCKS.json), [measured captures](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/WAVEFORMS.md)
+and [Git/raw/fresh-checkout byte audit](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/BYTE_AUDIT.json) are separate
+from all historical evidence. Qualified serial Questa/UVM configuration and
+seed `0x28A6BEEF` remain unchanged. NOT RUN statuses and scope limits below remain.
+
+## Historical corrective baseline — 10 November 2026
 
 Environment and runner: **`e6fbb510aa88b1f5aa8a7cc04926eeefbfb5be4d`**; inventory:
 `e6fbb510aa88b1f5aa8a7cc04926eeefbfb5be4d`; DUT stays `a2d3d57edaa9eb441f3289bf5320f4df2f074144`.
@@ -84,4 +106,4 @@ descriptors/scatter-gather, peripheral handshakes, multiple outstanding/reordere
 transactions, full AXI compliance, coverage closure, synthesis, timing, FPGA and
 hardware remain separate milestones. The prior eleven-project, APB and AXI4-Lite
 releases and all M. Roohan Khan/Talib attribution and upstream notices remain.
-Both focused PRs are open for review; no merged-main DMA UVM release is claimed.
+Both reviewed milestone PRs are merged; the separate merged-source result is recorded above.
