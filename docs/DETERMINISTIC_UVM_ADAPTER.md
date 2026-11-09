@@ -18,8 +18,8 @@ remains `a2d3d57edaa9eb441f3289bf5320f4df2f074144` despite this documentation me
 
 The 30 SVA controls, seven groups / 68 scenarios and ten fault qualifications
 all pass. Every fault child exits 1 for its intended diagnostic. All case counts
-match the prior qualified run: 150,777 comparisons, 90 commands = 87 terminals
-+ 3 reset cancellations, and 102 rejected-write readback checkpoints.
+match the prior qualified run: 150,777 comparisons, 90 commands = 87 terminals +
+3 reset cancellations, and 102 rejected-write readback checkpoints.
 [Normal-clone reproduction](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/REPRODUCE.md) explicitly detaches at the
 actual merge; no feature branch is required. [Raw results](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/run/results.json),
 [source/input hashes](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/SOURCE_LOCKS.json), [measured captures](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/5fa38d68d56426fdc01388a5bd885316e867a457/reports/dma-uvm-merged-2026-11-10/WAVEFORMS.md)
