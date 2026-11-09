@@ -5,27 +5,44 @@ the real RTL in this repository pinned to **`a2d3d57edaa9eb441f3289bf5320f4df2f0
 does not change RTL, the existing 40-case portable runner, source provenance,
 licences, attribution or historical evidence.
 
-## Tested environment and result
+## Corrected tested environment and result — 10 November 2026
 
-Environment: **`e93a6fdff85804dab7b5e636e43880e1ba7615ab`**; inventory:
-`be4449ab5092a294c3be4b83b7bac0660e429530`. [Immutable evidence](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/3d17e3bed5396c828a76be13ff18229e39dea740/reports/dma-uvm-2026-11-09/SUMMARY.md) records a clean detached
-GitHub run: **43/43 required substeps PASS**, aggregate and wrapper exit 0.
-These comprise 30 standalone SVA controls (one legal plus 29 expected-negative),
-five functional groups with 60 named scenarios, and eight fault qualifications.
-Every fault child exited 1 for its intended cause. Independent command/burst/beat
-and byte-memory accounting is included in the raw per-case JSON. The unchanged
-portable suite passed 40 cases / 1,352,655 checks; 11 archived files passed the
-existing provenance check. These quantities are not combined coverage.
+Environment and runner: **`e6fbb510aa88b1f5aa8a7cc04926eeefbfb5be4d`**; inventory:
+`e6fbb510aa88b1f5aa8a7cc04926eeefbfb5be4d`; DUT stays `a2d3d57edaa9eb441f3289bf5320f4df2f074144`.
+[Immutable corrected evidence](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/08bde7496be07c83c3acd546ecef6bc7e6cc40b5/reports/dma-uvm-corrective-2026-11-10/SUMMARY.md) records a clean detached GitHub run:
+**47/47 required PASS**, aggregate and wrapper exit 0. The named inventory
+comprises 30 standalone assertion controls (one legal, 29 expected negatives),
+seven functional groups with 68 scenarios, and ten fault qualifications. All ten
+fault children exit 1 for their intended diagnostic; unrelated crashes, tools,
+compile errors and timeouts cannot qualify a fault.
 
-The simulator was Questa Altera Starter FPGA Edition-64 2025.2, UVM runtime
-QUESTA_UVM-1.2.3, deterministic seed `0x28A6BEEF`. The runner uses serial sessions,
-direct `-onfinish exit`, bounded commands and explicit marker/error checking.
-An earlier shutdown crash and separate network-blocked attempt remain failed
-in the new report's development history. No simulator crash is treated as PASS.
+The old oracle falsely rejected seven legal modified-inactive-lane tail cases;
+the corrected expected-mask data oracle passes all seven, including stable
+stalled partial writes, with source/destination/guard memory correct. Exact
+WSTRB/LAST/progression and full offered-payload stability remain checked.
+Old CSR tests missed both idle partial-strobe and busy configuration side effects
+while SLVERR was returned. New protected-state readbacks detect both with
+`CSR_READ` and child exit 1. Every rejected write is followed by reads of
+SRC/DST/LENGTH and status/error/control before overwrite/reset. The busy
+responder stays paused until those reads finish, then completes normally.
+Disposable mutation source/diff/hashes are separate from the pristine DUT lock;
+no mutation is committed into this repository's production RTL.
+
+The final run recorded 150,777 comparisons,
+90 commands = 87 terminals + 3 reset cancellations,
+and 102 complete rejected-write readback checkpoints.
+Burst/beat/response relationships are reconciled in raw JSON. These are separate
+units, not functional coverage. Simulator: Questa Altera Starter FPGA Edition-64
+2025.2, runtime `QUESTA_UVM-1.2.3`, seed `0x28A6BEEF`; sessions are serial.
+
+The [original 43-substep report](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/3d17e3bed5396c828a76be13ff18229e39dea740/reports/dma-uvm-2026-11-09/SUMMARY.md)
+and its old evidence are preserved. The existing portable result (40 cases /
+1,352,655 checks) and 11-file provenance remain applicable; relevant inputs
+did not change and those checks were not rerun in this corrective pass.
 
 ## Adapter and supported contract
 
-The [public-pin adapter and requirements guide](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/3d17e3bed5396c828a76be13ff18229e39dea740/docs/DETERMINISTIC_DMA_UVM.md) connect a UVM
+The [public-pin adapter and requirements guide](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/08bde7496be07c83c3acd546ecef6bc7e6cc40b5/docs/DETERMINISTIC_DMA_UVM.md) connect a UVM
 AXI4-Lite CSR initiator and a genuinely early-W-buffering AXI4 memory responder
 to the existing ports. The scoreboard has separate CSR semantics and an
 independent sparse 32-bit byte model. AW/W acceptance, read/write beats,
@@ -49,13 +66,14 @@ No RTL correction was needed for this milestone.
 
 ## Reproduction and measured captures
 
-Follow the [exact detached-checkout reproduction command](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/3d17e3bed5396c828a76be13ff18229e39dea740/reports/dma-uvm-2026-11-09/REPRODUCE.md). The
-single top-level `scripts/run_dma_uvm.py` command lives in AMBA, checks the full
-environment SHA and clones this DUT at the lock above. Fault children use new
-detached local clones of that verified clean source. Choose fresh output paths.
-Eight measured figures are tied to original raw VCD bytes and exact tick windows;
-hashes were verified against Git blobs, public downloads and fresh checkouts.
-No newline conversion or expected diagram is presented as a new measurement.
+Follow the [normal-clone and detached-checkout command](https://github.com/M-Roohan-Khan-28/AMBA-Protocol-Verification/blob/08bde7496be07c83c3acd546ecef6bc7e6cc40b5/reports/dma-uvm-corrective-2026-11-10/REPRODUCE.md); it does not
+depend on the feature branch name. The single `scripts/run_dma_uvm.py` command
+checks the full environment SHA, clones the DUT at its unchanged lock and runs
+the complete derived inventory. Use fresh output paths. Three new measured
+figures show held inactive-lane transforms for tails 1 and 7 and busy rejected
+write/readback behavior. Actual VCDs, original hashes, Git/raw byte hashes and
+fresh autocrlf-false/true checkout checks accompany the figures. The historical
+eight measured figures remain unchanged. No newline-only behavior change is claimed.
 
 ## Unexecuted work and limits
 
